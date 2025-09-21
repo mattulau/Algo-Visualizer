@@ -13,26 +13,35 @@
             <h1>Pathfinding Visualizer</h1>
 
             <label class="field">
-                <span>Select Algorithm and Node Amount</span>
+                <span>Select Algorithm</span>
                 <select id="algo-select">
                   <option value="dijkstra">Dijkstra's</option>
                 </select>
             </label>
-            <label class="">
+            <label class="field">
+                <span>Select Node Size</span>
                 <select id="algo-size-select">
+                    <option value="0">none</option>
                     <option value="8">8</option>
                     <option value="16">16</option>
                     <option value="32">32</option>
                 </select>
             </label>
+           
+            <button id="btn-startPath" class="primary">Start Path</button>
+            <button id="btn-clearPath" class="primary">Clear Path</button>
+            <br>
+            <p>Node Counter: <span id="node-count">0</span></p>
 
-            <button id="btn-start" class="primary">Start Path</button>
-            <button id="btn-clear" class="primary">Clear Path</button>
-            <br>
-            <br>
             <!-- GRAPH AREA -->
-            <svg id="graph" width="800" height="600" style="border:2px solid #ccc;"></svg>
+            <svg id="graph" width="800" height="600" class="graph"></svg>
 
+            <div id="controls">
+                <img src="assets/add-button.svg" id="addNodeBtn" alt="Add Node" class="icon-btn">
+                <img src="assets/delete-button.svg" id="deleteNodeBtn" alt="Delete Node" class="icon-btn">
+                <img src="assets/start-button.svg" id="startBtn" alt="Start Algorithm" class="icon-btn">
+            </div>
+            <br>  
         </div>
      </section>
 

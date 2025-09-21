@@ -2,3 +2,20 @@
 .card {
     text-align: center;
 }
+
+
+.graph {
+    border:2px solid #ccc;
+}
+
+
+.icon-btn {
+    height: 100px;
+    width: 200px;
+    margin: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;    
+}
+.icon-btn:hover {
+    transform: scale(1.2);
+}
