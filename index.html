@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dijkstra's Algorithm Visualizer</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- STARTING SCREEN -->
@@ -12,17 +13,29 @@
             <h1>Pathfinding Visualizer</h1>
 
             <label class="field">
-                <span>Algorithm</span>
-                <select id=""algo-select">
+                <span>Select Algorithm and Node Amount</span>
+                <select id="algo-select">
                   <option value="dijkstra">Dijkstra's</option>
+                </select>
+            </label>
+            <label class="">
+                <select id="algo-size-select">
+                    <option value="8">8</option>
+                    <option value="16">16</option>
+                    <option value="32">32</option>
                 </select>
             </label>
 
             <button id="btn-start" class="primary">Start Path</button>
-
-
+            <button id="btn-clear" class="primary">Clear Path</button>
+            <br>
+            <br>
+            <!-- GRAPH AREA -->
+            <svg id="graph" width="800" height="600" style="border:2px solid #ccc;"></svg>
 
         </div>
      </section>
+
+     <script src="dijkstra.js"></script>
 </body>
 </html>
