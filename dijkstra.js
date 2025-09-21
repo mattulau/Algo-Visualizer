@@ -75,8 +75,12 @@ document.getElementById("algo-size-select").addEventListener("change", (e) => {
 
 
 document.getElementById("addNodeBtn").addEventListener("click", () => {
-  const x = 50 + (nodeCount * 50) % 700;
-  const y = 100 + Math.floor(nodeCount / 14) * 50;
+  const size = 32;
+  const maxX = svg.clientWidth - size;
+  const maxY = svg.clientHeight - size;
+  const x = Math.floor(Math.random() * maxX);
+  const y = Math.floor(Math.random() * maxY);
+  createNode(x, y, size)
 });
 
 document.getElementById("deleteNodeBtn").addEventListener("click", () => {
