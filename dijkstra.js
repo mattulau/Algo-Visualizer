@@ -47,10 +47,36 @@ function startAlgorithm() {
   alert("Algo would run");
 }
 
+function generateRandomNodes(count, size = 32) {
+  clearAllNodes();
+
+  const maxX = svg.clientWidth - size;
+  const maxY = svg.clientHeight - size;
+
+  for (let i = 0; i < count; i++) {
+    const x = Math.floor(Math.random() * maxX);
+    const y = Math.floor(Math.random() * maxY);
+    createNode(x, y, size);
+  }
+
+  generateRandomEdges();
+}
+
+// For Drop Down Menu
+document.getElementById("algo-size-select").addEventListener("change", (e) => {
+  const count = parseInt(e.target.value, 10);
+  if (count > 0) {
+    generateRandomNodes(count);
+  } else {
+    clearAllNodes();
+  }
+});
+
+
+
 document.getElementById("addNodeBtn").addEventListener("click", () => {
   const x = 50 + (nodeCount * 50) % 700;
   const y = 100 + Math.floor(nodeCount / 14) * 50;
-  createNode(x, y);
 });
 
 document.getElementById("deleteNodeBtn").addEventListener("click", () => {
