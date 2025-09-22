@@ -2,6 +2,7 @@
 
 const svg = document.getElementById("graph");
 const nodeCountDisplay = document.getElementById("node-count");
+const nodes = [];
 
 let nodeCount = 0;
 const nodeFiles = [ "assets/node-1.svg", "assets/node-2.svg", "assets/node-3.svg", "assets/node-4.svg", "assets/node-5.svg", "assets/node-6.svg", "assets/node-7.svg" ];
@@ -12,7 +13,7 @@ function updateCounter() {
   nodeCountDisplay.textContent = nodeCount;
 }
 
-function createNode(x, y, size = 32) {
+function createNode(x, y, size = 20) {
   nodeCount++;
   const randomFile = nodeFiles[Math.floor(Math.random() * nodeFiles.length)];
 
@@ -47,16 +48,35 @@ function startAlgorithm() {
   alert("Algo would run");
 }
 
-function generateRandomNodes(count, size = 32) {
+function generateRandomNodes(count, size = 20) {
   clearAllNodes();
 
   const maxX = svg.clientWidth - size;
   const maxY = svg.clientHeight - size;
+  const minDist = size * 3;
 
   for (let i = 0; i < count; i++) {
-    const x = Math.floor(Math.random() * maxX);
-    const y = Math.floor(Math.random() * maxY);
-    createNode(x, y, size);
+    let valid = false;
+    while(!valid) {
+      const tempX = Math.floor(Math.random() * maxX);
+      const tempY = Math.floor(Math.random() * maxY);
+      valid = true;
+      for (let j = 0; j < nodes.length; j++) {
+        const dx = nodes[j].x - tempX;
+        const dy = nodes[j].y - tempY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        const x = tempX;
+        const y = tempY;
+        createNode(x, y, size);
+        nodes.push({x, y})
+      }
+    }
   }
 
   generateRandomEdges();
@@ -75,12 +95,32 @@ document.getElementById("algo-size-select").addEventListener("change", (e) => {
 
 
 document.getElementById("addNodeBtn").addEventListener("click", () => {
-  const size = 32;
+  const size = 20;
   const maxX = svg.clientWidth - size;
   const maxY = svg.clientHeight - size;
-  const x = Math.floor(Math.random() * maxX);
-  const y = Math.floor(Math.random() * maxY);
-  createNode(x, y, size)
+  const minDist = size * 2;
+  let valid = false;
+  while(!valid) {
+    const tempX = Math.floor(Math.random() * maxX);
+    const tempY = Math.floor(Math.random() * maxY);
+    valid = true;
+    for (let i = 0; i < nodes.length; i++) {
+      const dx = nodes[i].x - tempX;
+      const dy = nodes[i].y - tempY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist) {
+        valid = false;
+        break;
+      }
+    }
+    if (valid) {
+      const x = tempX;
+      const y = tempY;
+      createNode(x, y, size);
+      nodes.push({x, y});
+    }
+  }
+  generateRandomEdges();
 });
 
 document.getElementById("deleteNodeBtn").addEventListener("click", () => {
