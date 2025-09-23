@@ -3,7 +3,7 @@
 const svg = document.getElementById("graph");
 const nodeCountDisplay = document.getElementById("node-count");
 const nodes = [];
-// const edges = [];
+const edges = [];
 
 let nodeCount = 0;
 const nodeFiles = [ "assets/node-1.svg", "assets/node-2.svg", "assets/node-3.svg", "assets/node-4.svg", "assets/node-5.svg", "assets/node-6.svg", "assets/node-7.svg" ];
@@ -31,7 +31,7 @@ function createNode(x, y, size = 20) {
 }
 
 function createEdge(nodeA, nodeB, weight = 1) {
-  
+
 }
 
 function deleteNode() {
@@ -88,7 +88,7 @@ function generateRandomNodes(count, size = 20) {
 }
 
 function generateRandomEdges() {
-  
+
 }
 
 
@@ -152,6 +152,9 @@ document.getElementById("btn-startPath").addEventListener("click", () => {
 
 document.getElementById("btn-clearPath").addEventListener("click", () => {
   clearAllNodes();
+
+  const presetSelect = document.getElementById("algo-size-select");
+  presetSelect.value = "0";
 });
 
 /* Graph Controls */
