@@ -18,8 +18,9 @@
                   <option value="dijkstra">Dijkstra's</option>
                 </select>
             </label>
+
             <label class="field">
-                <span>Select Node Size</span>
+                <span>Select Nodes</span>
                 <select id="algo-size-select">
                     <option value="0">none</option>
                     <option value="16">16</option>
@@ -34,7 +35,34 @@
             <p>Node Counter: <span id="node-count">0</span></p>
 
             <!-- GRAPH AREA -->
-            <svg id="graph" width="100%" height="750" class="graph"></svg>
+            <div class="frame">
+                <div class="stage">
+                  <svg id="graph" width="100%" height="750" class="graph"></svg>
+                </div>
+            </div>
+
+            <div class="bottom-grid">
+              <div class="card info">
+                <h3>Legend</h3>
+                <ul class="legend">
+                    <li><span class="dot start"></span> Start Node:</li>
+                    <li><span class="dot end"></span> End Node:</li>
+                    <li><span class="dot visited"></span> Visited:</li>
+                    <li><span class="dot path"></span> Shortest Path:</lil>
+                    <li><span class="dot current"></span> Current Node:</li>
+                </ul>
+              </div>
+
+              <div class="card info">
+                <h3>Algorithm Stats</h3>
+                <div class="stats">
+                    <div><span>Nodes:</span> <strong id="stat-nodes">32</strong></div>
+                    <div><span>Edges:</span> <strong id="stats-edges">0</strong></div>
+                    <div><span>Vistied:</span> <strong id="stat-visited">0</strong></div>
+                    <div><span>Status:</span> <strong id="stat-status">Ready</strong></div>
+                </div>
+              </div>
+            </div>
 
             <div id="controls">
                 <img src="assets/add-button.svg" id="addNodeBtn" alt="Add Node" class="icon-btn">
