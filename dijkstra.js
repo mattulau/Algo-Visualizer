@@ -43,8 +43,9 @@ function deleteNode() {
 }
 
 function clearAllNodes() {
-  const nodes = svg.querySelectorAll(".graph-node");
-  nodes.forEach(node => svg.removeChild(node));
+  nodes.length = 0;
+  edges.length = 0;
+  svg.innerHTML = "";
   nodeCount = 0;
   updateCounter();
 }
