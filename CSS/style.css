@@ -19,3 +19,51 @@
 .icon-btn:hover {
     transform: scale(1.2);
 }
+
+/* layout under the graph */
+
+.bottom-grid{
+    display: flex;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 12px auto 0;
+    padding: 0 6px;
+}
+.bottom-grid > .card { flex: 1; }
+
+@media (max-width: 900px){
+    .bottom-grid{ flex-direction: column; }
+}
+
+.legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+
+.legend li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+
+/* mini circles */ 
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, .2); /* optional outline */ 
+}
+
+/* matching graph to node colors */
+.dot.start   { background: #3FB05F; }
+.dot.end     { background: #F53333; }
+.dot.visited { background: #9854EB; }
+.dot.path    { background: #FDCB35; }
+.dot.current { background: #FF4A9B; }
