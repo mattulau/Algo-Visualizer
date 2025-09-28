@@ -30,14 +30,61 @@ function createNode(x, y, size = 20) {
   updateCounter();
 }
 
+function distance(nodeA, nodeB) {
+
+  const x1 = parseFloat(nodeA.getAttribute("x")) + parseFloat(nodeA.getAttribute("width")) / 2;
+  const y1 = parseFloat(nodeA.getAttribute("y")) + parseFloat(nodeA.getAttribute("height")) / 2;
+  const x2 = parseFloat(nodeB.getAttribute("x")) + parseFloat(nodeB.getAttribute("width")) / 2;
+  const y2 = parseFloat(nodeB.getAttribute("y")) + parseFloat(nodeB.getAttribute("height")) / 2;
+
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+
+}
+
+
 function createEdge(nodeA, nodeB, weight = 1) {
+
+  const exists = edges.some(
+    e =>
+      (e.from === nodeA && e.to === nodeB) || 
+      (e.from === nodeB && e.to === nodeA)
+  );
+  if (exists) return;
+
+  const x1 = parseFloat(nodeA.getAttribute("x")) + parseFloat(nodeA.getAttribute("width")) / 2;
+  const y1 = parseFloat(nodeA.getAttribute("y")) + parseFloat(nodeA.getAttribute("height")) / 2;
+  const x2 = parseFloat(nodeB.getAttribute("x")) + parseFloat(nodeB.getAttribute("width")) / 2;
+  const y2 = parseFloat(nodeB.getAttribute("y")) + parseFloat(nodeB.getAttribute("height")) / 2;
+
+  const newEdge = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  newEdge.setAttribute("x1", x1);
+  newEdge.setAttribute("y1", y1);
+  newEdge.setAttribute("x2", x2);
+  newEdge.setAttribute("y2", y2);
+  newEdge.setAttribute("stroke", "black");
+  newEdge.setAttribute("stroke-widdth", "2");
+  newEdge.classList.add("graph-edge");
+
+  svg.insertBefore(newEdge, svg.firstChild);
+
+  edges.push({ from: nodeA, to: nodeB, weight, element: newEdge });
 
 }
 
 function deleteNode() {
   const nodes = svg.querySelectorAll(".graph-node");
   if (nodes.length > 0) {
-    svg.removeChild( nodes [nodes.length -1] );
+    const nodeToDelete = nodes[nodes.length - 1];
+
+    for (let i = edges.length - 1; i >= 0; i--) {
+      if (edges[i].from === nodeToDelete || edges[i].to === nodeToDelete) {
+        edges[i].element.remove();
+        edges.splice(i, 1);
+      }
+    }
+
+    svg.removeChild(nodeToDelete);
+
     updateCounter();
   }
 }
@@ -90,6 +137,25 @@ function generateRandomNodes(count, size = 20) {
 
 function generateRandomEdges() {
 
+  edges.forEach(edge => edge.element.remove());
+  edges.length = 0;
+
+  const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
+
+  nodeElements.forEach((nodeA, i ) => {
+    const distances = nodeElements.map((nodeB, j) => {
+      if (i === j) return null;
+      return { node: nodeB, dist: distance(nodeA, nodeB) };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.dist - b.dist);
+
+    const neighbors = distances.slice(0,6); // (0, 2,3,4,...) second number changes the amount of nodes it will connect to
+    neighbors.forEach(({ node }) => {
+      const weight = Math.floor(Math.random() * 10) + 1;
+      createEdge(nodeA, node, weight);
+    });
+  });
 }
 
 
