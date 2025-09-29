@@ -86,6 +86,8 @@ function deleteNode() {
     svg.removeChild(nodeToDelete);
 
     updateCounter();
+
+    generateRandomEdges();
   }
 }
 
