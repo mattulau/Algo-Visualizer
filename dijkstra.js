@@ -152,7 +152,7 @@ function generateRandomEdges() {
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist);
 
-    const neighbors = distances.slice(0,6); // (0, 2,3,4,...) second number changes the amount of nodes it will connect to
+    const neighbors = distances.slice(0,4); // (0, 2,3,4,...) second number changes the amount of nodes it will connect to
     neighbors.forEach(({ node }) => {
       const weight = Math.floor(Math.random() * 10) + 1;
       createEdge(nodeA, node, weight);
