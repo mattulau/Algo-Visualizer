@@ -216,7 +216,7 @@ body {
 
 /* Visualization Screen Styles */ 
 .viz-container {
-    min-height: 100vh;
+    min-height: 10vh;
     padding: 20px;
     display: flex;
     flex-direction: column;
