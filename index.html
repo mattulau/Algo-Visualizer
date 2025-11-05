@@ -4,75 +4,258 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dijkstra's Algorithm Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./CSS/style.css">
 </head>
 <body>
     <!-- STARTING SCREEN -->
-     <section id="start-screen" class="screen visible">
-        <div class="card">
-            <h1>Pathfinding Visualizer</h1>
+     <section id="start-screen" class="screen active">
+        <div class="container">
+            <h1 class="main-title">Algorithm Visualizer</h1>
+            <p class="subtitle">Exploring algorithms through interactive pathfinding</p>
+            
+            <div class="control-panel">
+              <div class="section-title">Graph Size (Number of Nodes)</div>
 
-            <label class="field">
-                <span>Select Algorithm</span>
-                <select id="algo-select">
-                  <option value="dijkstra">Dijkstra's</option>
-                </select>
-            </label>
-
-            <label class="field">
-                <span>Select Nodes</span>
-                <select id="algo-size-select">
-                    <option value="0">none</option>
-                    <option value="16">16</option>
-                    <option value="32">32</option>
-                    <option value="64">64</option>
-                </select>
-            </label>
-           
-            <button id="btn-startPath" class="primary">Start Path</button>
-            <button id="btn-clearPath" class="primary">Clear Path</button>
-            <br>
-            <p>Node Counter: <span id="node-count">0</span></p>
-
-            <!-- GRAPH AREA -->
-            <div class="frame">
-                <div class="stage">
-                  <svg id="graph" width="100%" height="630" class="graph"></svg>
-                </div>
+            <div class="node-options">
+                <button class="node-btn" data-nodes="8">8 Nodes</button>
+                <button class="node-btn" data-nodes="16">16 Nodes</button>
+                <button class="node-btn" data-nodes="32">32 Nodes</button>
+                <button class="node-btn" data-nodes="64">64 Nodes</button>
+                <button class="node-btn" data-nodes="128">128 Nodes</button>
             </div>
+           
+            <div class="algorithms-container">
+              <div class="algorithm-card active" data-algorithm="dijkstra">
+                <div class="algorithm-header">
+                  <span class="algorithm-name">Dijkstra's Algorithm </span>
+                  <span class="algorithm-tag">pathfinding</span>
+                </div>
+                <p class="algorithm-description">Finds the shortest path between nodes</p>
+                <div class="complexity">
+                   <span>Complexity:</span>
+                   <span class="complexity-value">O(V + E) log V</span>
+                </div>
+              </div>
 
-            <div class="bottom-grid">
-              <div class="card info">
+              <div class="algorithm-card" data-algorithm="astar">
+                  <div class="algorithm-header">
+                      <span class="algorithm-name">A* Search</span>
+                      <span class="algorithm-tag">pathfinding</span>
+                  </div>
+                  <p class="algorithm-description"> Heuristic pathfinding algorithm</p>
+                  <div class="complexity">
+                      <span>Complexity:</span>
+                      <span class="complexity-value">O(b^d)</span>
+                  </div>
+              </div>
+          </div>
+
+          <button class="start-viz-btn" id="startVisualization">Start Visualization</button>
+        </div>
+
+        <p class="instruction-text">Select an algorithm above to begin the visualization</p>
+     </div>
+</section>
+
+    <!-- VISUALIZATION SCREEN -->
+    <section id="viz-screen" class="screen">
+      <div class="container">
+         <!-- HEADER WITH BUTTONS -->
+         <div class="viz-container">
+             <button class="control-btn back-btn" id="backBtn">
+                 <span class="btn-icon">◄</span> Back
+             </button>
+             <button class="control-btn stop-btn" id="stopBtn">
+                 <span class="btn-icon">⬛</span> Stop 
+             </button>
+         </div>
+
+         <div class="header-center">
+             <h2 id="algorithmTitle">Dijkstra's Shortest Path</h2>
+             <p id="nodeCountDisplay">16 nodes</p>
+         </div>
+
+         <div class="header-right"></div>
+            <button class="control-btn start-btn" id="startAlgoBtn">
+                <span class="btn-icon>▶</span> Start
+            </button>
+            <button class="control-btn reset-btn" id="resetBtn">
+              <span class="btn-icon">↻</span> Reset
+            </button>
+         </div>
+      </div>
+
+      <div class="container">
+        <!--- Hidden element for dijkstra.js -->
+         <span id="node-count" style="display: none;">0</span>
+
+         <!-- GRAPH AREA -->
+        <div class="frame">
+            <div class="stage">
+                <svg id="graph" width="100%" height="630" class="graph"></svg>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="card info">
                 <h3>Legend</h3>
                 <ul class="legend">
                     <li><span class="dot start"></span> Start Node</li>
                     <li><span class="dot end"></span> End Node</li>
                     <li><span class="dot visited"></span> Visited</li>
-                    <li><span class="dot path"></span> Shortest Path</lil>
+                    <li><span class="dot path"></span> Shortest Path</li>
                     <li><span class="dot current"></span> Current Node</li>
                 </ul>
-              </div>
-
-              <div class="card info">
-                <h3>Algorithm Stats</h3>
-                <div class="stats">
-                    <div><span>Nodes:</span>   <strong id="stat-nodes"></strong></div>
-                    <div><span>Edges:</span>   <strong id="stats-edges"></strong></div>
-                    <div><span>Vistied:</span> <strong id="stat-visited"></strong></div>
-                    <div><span>Status:</span>  <strong id="stat-status"></strong></div>
-                </div>
-              </div>
             </div>
 
-            <div id="controls">
-                <img src="assets/add-button.svg" id="addNodeBtn" alt="Add Node" class="icon-btn">
-                <img src="assets/delete-button.svg" id="deleteNodeBtn" alt="Delete Node" class="icon-btn">
-                <img src="assets/start-button.svg" id="startBtn" alt="Start Algorithm" class="icon-btn">
+            <div class="card info">
+              <h3>Algorithm Stats</h3>
+              <div class="stats">
+                  <div><span>Nodes:</span>   <strong id="stat-nodes"></strong></div>
+                  <div><span>Edges:</span>   <strong id="stats-edges"></strong></div>
+                  <div><span>Vistied:</span> <strong id="stat-visited"></strong></div>
+                  <div><span>Status:</span>  <strong id="stat-status"></strong></div>
+              </div>
             </div>
-            <br>  
+          </div>
         </div>
-     </section>
+      </div>
+    </section>
 
-     <script src="dijkstra.js"></script>
+
+    <script src="dijkstra.js"></script>
+
+    <script> 
+
+      let selectedNodeCount = null; 
+      let selectedAlgorithm = null;
+
+      // Node selection - updates when any button is clicked 
+      document.querySelectorAll('.node-btn').forEach(btn => {
+         btn.addEventListener('click', () => {
+             // Remove active from all 
+             document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+             // Add active to clicked 
+             btn.classList.add('active');
+             // Update the selection variable 
+             selectedNodeCount = parseInt(btn.getAttribute('data-nodes'));
+             console.log('Node count changed to: ', selectedNodeCount);
+         });
+      });
+
+      // Algorithm selection - updates when any card is clicked 
+      document.querySelectorAll('.algorithm-card').forEach(card => {
+          card.addEventListener('click', () => {
+              // Remove active from all 
+              document.querySelectorAll('.algorithm-card').forEach(c => c.classList.remove('active'));
+              // Add active to clicked buttons 
+              card.classList.add('active');
+              // Update the selection variable 
+              selectedAlgorithm = card.getAttribute('data-algorithm');
+              console.log('Algorithm changed to:', selectedAlgorithm);
+          });
+      });
+
+      // Start Visualization - Screen switching functionality 
+      document.getElementById('startVisualization').addEventListener('click', () => {
+        console.log('▶ Starting visualization with', selectedNodeCount, 'nodes using', selectedAlgorithm);
+
+        // Switch screens 
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('viz-screen').classList.add('active');
+        
+        // Update header based on selection 
+        if (selectedAlgorithm === 'dijkstra') {
+            document.getElementById('algorithmTitle').textContent = "Dijkstra's Shortest Path";
+        } else {
+            document.getElementById('algorithmTitle').textContent = "A* Search Path";
+        }
+
+
+        document.getElementById('nodeCountDisplay').textContent = selectedNodeCount + ' Nodes';
+
+        // Small delay to ensure SVG is rendered 
+        setTimeout(() => {
+          // Generate graph with selected count 
+          if (typeof generateRandomNodes === 'function') {
+            try {
+              console.log(' Calling generateRandomNodes(' + selectedNodeCount + ')');
+              generateRandomNodes(selectedNodeCount);
+
+              // Update stats after generation 
+              setTimeout(() => {
+                if (document.getElementById('stat-nodes')) {
+                    document.getElementById('stat-nodes'). textContent = count;
+                }
+                if (typeof edges !== 'undefined' && document.getElementById('stat-edges')) {
+                    document.getElementById('stat-edges').textContent = edges.length;
+                }
+                console.log(' Graph generate with'), selectedNodeCount, 'nodes';
+              }, 100);
+            } catch (error) {
+              console.error('Error generating nodes:', error);
+            }
+          }
+       }, 50);
+    }); 
+
+    // Back button 
+  document.getElementById('backBtn').addEventListener('click', () => {
+      document.getElementById('viz-screen').classList.remove('active');
+      document.getElementById('start-screen').classList.add('active');
+
+      if (typeof clearAllNodes === 'function') {
+          clearAllNodes();
+      }
+  });
+
+    // Stop button 
+    document.getElementById('stopBtn').addEventListener('click', () => {
+        console.log('⏸ Algorithm stopped');
+        document.getElementById('stat-status').textContent = 'Stopped';
+    });
+    
+    // Start algorithm button 
+    document.getElementById('startAlgoBtn').addEventListener('click', () => {
+        if (!selectedAlgorithm) {
+          console.log('⚠️ No algorithm selected');
+          return;
+        }
+
+      console.log('▶ Starting', selectedAlgorithm, 'algorithm');
+
+      if (typeof startAlgorithm === 'function') {
+        startAlgorithm();
+      }
+      document.getElementById('stat-status').textContent = 'Running';
+    });
+    
+    // Reset Button - regernates with same count 
+    document.getElementById('resetBtn').addEventListener('click', () => {
+       if (!selectedNodeCount) {
+        console.log('⚠️ No node count selected');
+        return;
+       }
+
+       console.log(' Resetting graph with', selectedNodeCount, 'nodes');
+
+       if (typeof generateRandomNodes === 'function') {
+        generateRandomNodes(selectedNodeCount);
+
+        setTimeout(() => {
+          if (document.getElementById('stat-nodes')) {
+            document.getElementById('stat-nodes').textContent = selectedNodeCount;
+          }
+          if (typeof edges !== 'undefined' && document.getElementById('stat-edges')) {
+            document.getElementById('stat-edges').textContent = edges.length;
+          }
+        }, 100);
+       }
+
+       document.getElementById('stat-visited').textContent = '0';
+       document.getElementById('stat-status').textContent = 'Ready';
+    });
+  </script>
 </body>
 </html>
