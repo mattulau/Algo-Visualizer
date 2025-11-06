@@ -42,7 +42,7 @@ function distance(nodeA, nodeB) {
 }
 
 
-function createEdge(nodeA, nodeB, weight = 1) {
+function createEdge(nodeA, nodeB, weight = Math.floor(Math.random() * 10) + 1) {
 
   const exists = edges.some(
     e =>
@@ -56,19 +56,70 @@ function createEdge(nodeA, nodeB, weight = 1) {
   const x2 = parseFloat(nodeB.getAttribute("x")) + parseFloat(nodeB.getAttribute("width")) / 2;
   const y2 = parseFloat(nodeB.getAttribute("y")) + parseFloat(nodeB.getAttribute("height")) / 2;
 
-  const newEdge = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  newEdge.setAttribute("x1", x1);
-  newEdge.setAttribute("y1", y1);
-  newEdge.setAttribute("x2", x2);
-  newEdge.setAttribute("y2", y2);
-  newEdge.setAttribute("stroke", "black");
-  newEdge.setAttribute("stroke-widdth", "2");
-  newEdge.classList.add("graph-edge");
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const ux = dx / length;
+  const uy = dy /length;
 
-  svg.insertBefore(newEdge, svg.firstChild);
+  let angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
+  if (angleDeg > 90 || angleDeg < -90) angleDeg += 180;
 
-  edges.push({ from: nodeA, to: nodeB, weight, element: newEdge });
+  const gap = 20;
 
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  const x1b = midX - ux * gap / 2;
+  const y1b = midY - uy * gap / 2;
+  const x2b = midX + ux * gap / 2;
+  const y2b = midY + uy * gap / 2;
+
+  const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line1.setAttribute("x1", x1);
+  line1.setAttribute("y1", y1);
+  line1.setAttribute("x2", x1b);
+  line1.setAttribute("y2", y1b);
+  line1.setAttribute("stroke", "white");
+  line1.setAttribute("stroke-width", "1");
+  line1.classList.add("graph-edge");
+
+  const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line2.setAttribute("x1", x2b);
+  line2.setAttribute("y1", y2b);
+  line2.setAttribute("x2", x2);
+  line2.setAttribute("y2", y2);
+  line2.setAttribute("stroke", "white");
+  line2.setAttribute("stroke-width", "1");
+  line2.classList.add("graph-edge");
+
+  const px = -uy;
+  const py = ux; 
+  const labelOffset = 1;
+
+  const labelX = midX + px * labelOffset;
+  const labelY = midY + py * labelOffset;
+
+  const edgeLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  edgeLabel.setAttribute("x", labelX);
+  edgeLabel.setAttribute("y", labelY);
+  edgeLabel.setAttribute("fill", "white");
+  edgeLabel.setAttribute("font-size", "12");
+  edgeLabel.setAttribute("text-anchor", "middle");
+  edgeLabel.setAttribute("dominant-baseline", "middle");
+  edgeLabel.textContent = weight;
+
+const firstNode = svg.querySelector(".graph-node");
+if (firstNode) {
+  svg.insertBefore(line1, firstNode);
+  svg.insertBefore(line2, firstNode);
+  svg.insertBefore(edgeLabel, firstNode);
+} else {
+  svg.appendChild(line1);
+  svg.appendChild(line2);
+  svg.appendChild(edgeLabel);
+}
+  
+  edges.push({ from: nodeA, to: nodeB, weight, element1: line1, element2: line2, label: edgeLabel });
 }
 
 function deleteNode() {
@@ -78,7 +129,9 @@ function deleteNode() {
 
     for (let i = edges.length - 1; i >= 0; i--) {
       if (edges[i].from === nodeToDelete || edges[i].to === nodeToDelete) {
-        edges[i].element.remove();
+        edges[i].element1.remove();
+        edges[i].element2.remove();
+        edges[i].label.remove();
         edges.splice(i, 1);
       }
     }
@@ -93,6 +146,11 @@ function deleteNode() {
 
 function clearAllNodes() {
   nodes.length = 0;
+  edges.forEach(e => {
+    e.element1.remove();
+    e.element2.remove();
+    e.label.remove();
+  });
   edges.length = 0;
   svg.innerHTML = "";
   nodeCount = 0;
@@ -139,10 +197,15 @@ function generateRandomNodes(count, size = 20) {
 
 function generateRandomEdges() {
 
-  edges.forEach(edge => edge.element.remove());
+  edges.forEach(edge => { edge.element1.remove(); edge.element2.remove(); edge.label.remove(); });
   edges.length = 0;
 
+  const maxEdgesPerNode = 5; //max number of edges that can touch a node
+  const minEdgesPerNode = 2; //min number of edges that a node has
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
+
+  const edgeCounts = new Map();
+  nodeElements.forEach(n => edgeCounts.set(n, 0));
 
   nodeElements.forEach((nodeA, i ) => {
     const distances = nodeElements.map((nodeB, j) => {
@@ -152,80 +215,50 @@ function generateRandomEdges() {
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist);
 
-    const neighbors = distances.slice(0,4); // (0, 2,3,4,...) second number changes the amount of nodes it will connect to
-    neighbors.forEach(({ node }) => {
-      const weight = Math.floor(Math.random() * 10) + 1;
-      createEdge(nodeA, node, weight);
+    const neighbors = distances.slice(0,maxEdgesPerNode); // uses value from "maxEdgesPerNode" to determine amount of edges a node can be touched by
+    
+    neighbors.forEach(({ node: nodeB }) => {
+      if (edgeCounts.get(nodeA) < maxEdgesPerNode && edgeCounts.get(nodeB) < maxEdgesPerNode) {
+        const weight = Math.floor(Math.random() * 100) + 1; // changes edge weight max value
+        createEdge(nodeA, nodeB, weight);
+        
+        edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
+        edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
+      }
     });
   });
-}
 
+  nodeElements.forEach((nodeA, i) => {
+    let count = edgeCounts.get(nodeA);
+    if (count < minEdgesPerNode) {
+      const distances = nodeElements.map((nodeB, j) => {
+        if (i == j) return null;
+        return { node: nodeB, dist: distance(nodeA, nodeB) };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dist - b.dist);
 
-// For Drop Down Menu
-document.getElementById("algo-size-select").addEventListener("change", (e) => {
-  const count = parseInt(e.target.value, 10);
-  if (count > 0) {
-    generateRandomNodes(count);
-  } else {
-    clearAllNodes();
-  }
-});
+      for (const { node: nodeB } of distances) {
+        if (count >= minEdgesPerNode) break;
+        if (edgeCounts.get(nodeB) < maxEdgesPerNode) {
+          const exists = edges.some(
+            e =>
+            (e.from === nodeA && e.to === nodeB) ||
+            (e.from === nodeB && e.to === nodeA)
+          );
+          if (!exists) {
+            const weight = Math.floor(Math.random() * 10) + 1;
+            createEdge(nodeA, nodeB, weight);
 
-
-
-document.getElementById("addNodeBtn").addEventListener("click", () => {
-  const size = 20;
-  const maxX = svg.clientWidth - size;
-  const maxY = svg.clientHeight - size;
-  const minDist = size * 2;
-  let valid = false;
-  while(!valid) {
-    const tempX = Math.floor(Math.random() * maxX);
-    const tempY = Math.floor(Math.random() * maxY);
-    valid = true;
-    for (let i = 0; i < nodes.length; i++) {
-      const dx = nodes[i].x - tempX;
-      const dy = nodes[i].y - tempY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < minDist) {
-        valid = false;
-        break;
+            edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
+            edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
+            count++;
+          }
+        }
       }
     }
-    if (valid) {
-      const x = tempX;
-      const y = tempY;
-      createNode(x, y, size);
-      nodes.push({x, y});
-    }
-  }
-  generateRandomEdges();
-});
-
-document.getElementById("deleteNodeBtn").addEventListener("click", () => {
-  deleteNode();
-});
-
-document.getElementById("startBtn").addEventListener("click", () => {
-  startAlgorithm();
-});
-
-/* Size Preset Start Path */
-/* 
-
-document.getElementById("btn-startPath").addEventListener("click", () => {
-  startPresetPath();
-}); 
-
-*/
-
-document.getElementById("btn-clearPath").addEventListener("click", () => {
-  clearAllNodes();
-
-  const presetSelect = document.getElementById("algo-size-select");
-  presetSelect.value = "0";
-});
-
+  });
+}
 /* Graph Controls */
 
 function Dijkstra(start, target) {

@@ -331,6 +331,7 @@ body {
 
 .graph {
     border:2px solid #ccc;
+    background-color: #00679e; /* Algo Graph Background Color */
 }
 
 

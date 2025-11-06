@@ -240,6 +240,10 @@
 
        console.log(' Resetting graph with', selectedNodeCount, 'nodes');
 
+      if (typeof clearAllNodes === 'function') {
+        clearAllNodes();
+      }
+
        if (typeof generateRandomNodes === 'function') {
         generateRandomNodes(selectedNodeCount);
 
