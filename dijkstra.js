@@ -26,9 +26,39 @@ function createNode(x, y, size = 20) {
   newNode.setAttribute("height", size);
   newNode.classList.add("graph-node");
 
+  newNode.addEventListener("click", () => handleNodeClick(newNode) );
+
   svg.appendChild(newNode);
   updateCounter();
 }
+
+let selectedStartNode = null;
+let selectedEndNode = null;
+
+function handleNodeClick(node) {
+  if (!selectedStartNode) {
+    node.classList.add("start");
+    selectedStartNode = node;
+    console.log("Start node selected");
+  }
+  else if (!selectedEndNode && node !== selectedStartNode) {
+    node.classList.add("end");
+    selectedEndNode = node;
+    console.log("End node selected");
+  }
+  else if (node === selectedStartNode) {
+    node.classList.remove("start");
+    selectedStartNode = null;
+    console.log("Start node deselected");
+  }
+  else if (node === selectedEndNode) {
+    node.classList.remove("end");
+    selectedEndNode = null;
+    console.log("End node deselected");
+  }
+
+}
+
 
 function distance(nodeA, nodeB) {
 
