@@ -60,9 +60,10 @@
 
     <!-- VISUALIZATION SCREEN -->
     <section id="viz-screen" class="screen">
-      <div class="container">
+      <div class="viz-container">
          <!-- HEADER WITH BUTTONS -->
-         <div class="viz-container">
+         <div class="viz-header">
+           <div class="header-left">
              <button class="control-btn back-btn" id="backBtn">
                  <span class="btn-icon">◄</span> Back
              </button>
@@ -86,15 +87,16 @@
          </div>
       </div>
 
-      <div class="container">
         <!--- Hidden element for dijkstra.js -->
          <span id="node-count" style="display: none;">0</span>
 
          <!-- GRAPH AREA -->
-        <div class="frame">
-            <div class="stage">
+        <div class="graph-container">
+           <div class="frame">
+              <div class="stage">
                 <svg id="graph" width="100%" height="630" class="graph"></svg>
-            </div>
+              </div>
+           </div>
         </div>
 
         <div class="bottom-grid">

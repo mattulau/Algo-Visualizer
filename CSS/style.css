@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Jost', sans-serif;
-    background: linear-gradient(135deg, #001e40 0%, #032952 100%);
+    background: linear-gradient(180deg, #001E40 0%, #036FAA 50%, #032952 75%, #0C68CC 100%);
     color: #FFFFFF;
     min-height: 100vh;
     overflow-x: hidden;
@@ -27,24 +27,41 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 60px 20px;
+    padding: 40px 20px;
     text-align: center; 
 }
 
 
 .main-title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: 700;
-    color: #30CBFF;
-    margin-bottom: 20px;
+    background: linear-gradient(90deg, #30CBFF 0%, #FFFFFF 50%, #30CBFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 25px;
     letter-spacing: 2px;
+    position: relative;
+    display: inline-block;
+}
+
+.main-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 3px;
+    background: #30CBFF;
 }
 
 .subtitle {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 400;
     color: #FFFFFF;
-    margin-bottom: 60px;
+    margin-bottom: 40px;
+    margin-top: 25px;
     opacity: 0.9; 
 }
 
@@ -52,67 +69,113 @@ body {
     background: rgba(3, 111, 170, 0.3);
     border: 2px solid #30CBFF;
     border-radius: 30px;
-    padding: 50px 60px;
-    max-width: 1000px;
+    padding: 35px 45px;
+    max-width: 850px;
     margin: 0 auto 30px;
     box-shadow: 0 8px 32px rgba(48, 203, 255, 0.2);
+    position: relative;
+}
+
+.corner-cirlce {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #001E40;
+    border: 2px solid #30CBFF;
+
+}
+
+.corner-circle.top-left {
+    top: 18px;
+    left: 18px;
+}
+
+.corner-cirlce.top-right {
+    top: 18px;
+    right: 18px;
+}
+
+.corner-circle.bottom-left {
+    bottom: 18px;
+    left: 18px;
+
+}
+
+.corner-circle.bottom-right {
+    bottom: 18px;
+    right: 18px;
 }
 
 .section-title {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 500;
     color: #30CBFF;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: #30CBFF;
 }
 
 /* Node Options */ 
 .node-options {
     display: flex; 
     justify-content: center; 
-    gap: 20px;
-    margin-bottom: 50px;
+    gap: 15px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
 }
 
 .node-btn {
-    background: #032952;
+    background: linear-gradient(90deg, #248AFF 0%, #063466 100%);
     color: #FFFFFF;
-    border: 2px solid #036FAA;
-    border-radius: 12px;
-    padding: 15px 30px;
+    border: 2px solid #75E2DF;
+    border-radius: 10px;
+    padding: 10px 20px;
     font-family: 'Jost', sans-serif;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 7px 4px rgba(0, 0, 0, 0.25);
 }
 
 .node-btn:hover {
-    background: #036FAA;
     transform: translateY(-2px);
+    box-shadow: 0 9px 6px rgba(0, 0, 0, 0.3);
 }
 
 .node-btn.active {
-    background: #248AFF;
-    border-color: #248AFF;
-    box-shadow: 0 4px 15px rgba(36, 138, 255, 0.4);
+    background: linear-gradient(90deg, #30CBFF 0%, #248AFF 50%, #58C0DB 100%);
+    border: 2px solid #75E2DF;
+    box-shadow: 0 7px 4px rgba(0, 0, 0, 0.25);
 }
 
 /* Algorithm Cards */ 
 .algorithms-container {
     display: flex;
     justify-content: center;
-    gap: 40px;
-    margin-bottom: 50px;
+    gap: 25px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
 }
 
 .algorithm-card {
     background: linear-gradient(135deg, #032952 0%, #001e40, 100%);
     border: 2px solid #036FAA;
-    border-radius: 20px;
-    padding: 30px;
-    width: 400px;
+    border-radius: 15px;
+    padding: 18px 28px;
+    width: 340px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative; 
@@ -133,12 +196,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 
 .algorithm-name {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #FFFFFF;
 }
@@ -162,7 +225,7 @@ body {
 .algorithm-description {
     font-size: 1rem;
     color: #FFFFFF;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     opacity: 0.9;
     text-align: left;
 }
@@ -171,7 +234,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: #FFFFFF;
 }
 
@@ -188,9 +251,9 @@ body {
     background: #30cbff;
     color: #001e40;
     border: none;
-    border-radius: 15px;
-    padding: 18px 50px;
-    font-size: 1.2rem;
+    border-radius: 12px;
+    padding: 14px 40px;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease; 
@@ -208,33 +271,34 @@ body {
 }
 
 .instruction-text {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: #FFFFFF;
-    opacity: 0.8;
+    opacity: 0.9;
+    margin-top: 15px;
 }
 
 
 /* Visualization Screen Styles */ 
 .viz-container {
-    min-height: 10vh;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+    padding: 10px 20px 20px 20px;
+    
 }
 
 .viz-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding: 0 20px;
+    margin-bottom: 5px;
+    padding: 10px 40px 5px 40px;
+    gap: 20px;
 }
 
 .header-left,
 .header-right {
     display: flex;
-    gap: 15px;
-    flex: 1;
+    gap: 12px;
+    flex: 0 0 auto;
+    align-items: center;
 }
 
 .header-right {
@@ -244,13 +308,32 @@ body {
 .header-center {
     text-align: center;
     flex: 1;
+    margin: 0;
+    padding: 0;
 }
 
 #algorithmTitle {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 600;
-    color: #30cbff;
-    margin-bottom: 5px;
+    background: linear-gradient(90deg, #30CBFF 0%, #FFFFFF 50%, #30CBFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    display: inline-block;
+}
+
+#algorithm::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: #30CBFF;
 }
 
 #nodeCount {
@@ -259,38 +342,51 @@ body {
     opacity: 0.8; 
 }
 
+#nodeCountDisplay {
+    font-size: 1.1rem;
+    color: #FFFFFF;
+    opacity: 0.9;
+    margin: 0;
+    padding: 0;
+}
+
 /* Control Buttons */ 
 .control-btn {
     background: #032952;
     color: #FFFFFF;
     border: 2px solid #036faa;
-    border-radius: 12px;
-    padding: 12px 24px;
+    border-radius: 10px;
+    padding: 10px 20px;
     font-family: 'jost', sans-serif;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500; 
     cursor: pointer; 
     transition: all 0.3s ease;
+    display: inline-flex;
     align-items: center; 
     gap: 8px;
+    white-space: nowrap;
 }
 
 .control-btn:hover {
     background: #036faa;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(3, 111, 170, 0.3);
 }
 
 
 .start-btn {
-    background: #30cbff;
+    background: linear-gradient(135deg, #30CBFF 0%, #19F7FF 100%);
     border-color: #30cbff;
     color: #001e40;
+    font-weight: 600;
 }
 
 
 .start-btn:hover {
-    background: #19f7ff;
+    background: linear-gradient(135deg, #19F7FF 0%, #30CBFF 100%);
     border-color: #19f7ff;
+    box-shadow: 0 4px 15px rgba(48, 203, 255, 0.5);
 }
 
 .btn-icon {
@@ -299,39 +395,72 @@ body {
 
 
 /* Visualization Content */ 
-.viz-content {
-    display: flex;
-    gap: 30px;
-    flex: 1;
-}
-
 
 .graph-container {
     flex: 1; 
-    background: rgba(3, 41, 82, 0.3);
+    background: rgba(3, 111, 170, 0.2);
     border: 2px solid #30cbff;
     border-radius: 20px;
-    padding: 30px;
+    padding: 15px;
     display: flex;
     justify-content: center;
     align-items: center; 
+    margin: 5px 40px 15px 40px;
 }
 
 
+.frame {
+    width: 100%;
+    background: rgba(1, 30, 64, 0.4);
+    border: 2px solid #036FAA;
+    border-radius: 15px;
+    padding: 15px; 
+}
 
 
-
-
+.stage {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 
 .card {
+    background: linear-gradient(135deg, rgba(3, 41, 82, 0.6) 0%, rgba(1, 30, 64, 0.6) 100%);
+    border: 2px solid #306FAA;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0 8px 20px rgba(0, 30, 64, 0.4);
+}
+
+.card h3 {
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
     text-align: center;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.card h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background: #30CBFF;
 }
 
 
 .graph {
-    border:2px solid #ccc;
-    background-color: #00679e; /* Algo Graph Background Color */
+    border: none;
+    background-color: #001E40; /* Algo Graph Background Color */
+    border-radius: 10px;
 }
 
 
@@ -350,10 +479,10 @@ body {
 
 .bottom-grid{
     display: flex;
-    gap: 16px;
+    gap: 20px;
     max-width: 1100px;
-    margin: 12px auto 0;
-    padding: 0 6px;
+    margin: 15px auto 30px;
+    padding: 0 40px;
 }
 .bottom-grid > .card { flex: 1; }
 
@@ -366,15 +495,16 @@ body {
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 10px;
+    gap: 8px;
 }
 
 
 .legend li {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #FFFFFF;
 }
 
 
@@ -393,6 +523,30 @@ body {
 .dot.visited { background: #9854EB; }
 .dot.path    { background: #FDCB35; }
 .dot.current { background: #FF4A9B; }
+
+
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stats > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.stats span {
+    color: #5CD3FF;
+
+}
+
+.stats strong {
+    color: #FFFFFF;
+    font-weight: 600;
+}
 
 
 .graph-node.start {
