@@ -9,12 +9,23 @@ let currentPathEdges = [];
 let selectedStartNode = null;
 let selectedEndNode = null;
 let nodeCount = 0;
+let visitedCount = 0;
 const nodeFiles = [ "assets/node-1.svg", "assets/node-2.svg", "assets/node-3.svg", "assets/node-4.svg", "assets/node-5.svg", "assets/node-6.svg", "assets/node-7.svg" ];
 
 function updateCounter() {
   const nodes = svg.querySelectorAll(".graph-node")
   nodeCount = nodes.length;
   nodeCountDisplay.textContent = nodeCount;
+}
+
+function updateVisitedCount() {
+  const visitedElem = document.getElementById('stat-visited');
+  if (visitedElem) visitedElem.textContent = visitedCount;
+}
+
+function resetVisitedCount() {
+  visitedCount = 0;
+  updateVisitedCount();
 }
 
 function createNode(x, y, size = 20) {
@@ -225,13 +236,15 @@ function startAlgorithm() {
     return false;
   }
 
+  resetVisitedCount(); //reset count before running again
+
   const result = Dijkstra(selectedStartNode, selectedEndNode);
   if (!result) {
     alert("Algorithm failed to run.");
     return false;
   }
 
-  const { distanceToTarget, prev, steps } = result;
+  const { distanceToTarget, prev, steps, visitedNodeSet, visitedEdgeSet } = result;
 
   if (!Number.isFinite(distanceToTarget)) {
     alert("No path exists between the selected nodes.");
@@ -248,6 +261,10 @@ function startAlgorithm() {
 
   playSteps(steps, () => {
     highlightFinalPath(finalPath);
+
+    const totalVisited = visitedNodeSet.size + visitedEdgeSet.size;
+    document.getElementById('stat-visited').textContent = totalVisited;
+
     document.getElementById("stat-status").textContent = "Completed";
   });
 
@@ -340,6 +357,7 @@ function generateRandomEdges() {
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
   if (nodeElements.length <= 1) return;
 
+  const MAX_DISTANCE = 1000; // Changes how far a node will look to attach an edge to another node
   const MIN_EDGES = 2;
   const MAX_EDGES = 4;
 
@@ -383,7 +401,9 @@ function generateRandomEdges() {
     const neighbors = nodeElements
       .map((nodeB, j) => {
         if (i === j) return null;
-        return { node: nodeB, dist: distance(nodeA, nodeB) };
+        const dist = distance(nodeA, nodeB);
+        if (dist > MAX_DISTANCE) return null;
+        return { node: nodeB, dist };
       })
       .filter(Boolean)
       .sort((a, b) => a.dist - b.dist);
@@ -403,10 +423,11 @@ function generateRandomEdges() {
       createEdge(nodeA, nodeB, weight);
       edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
       edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
+
+      if (edgeCounts.get(nodeA) >= MIN_EDGES) break;
     }
   });
 
-  // Optional: You can also consider rerunning a force-directed layout or apply node repositioning after edges are created to reduce clutter.
 }
 
 
@@ -426,6 +447,11 @@ function Dijkstra(start, target) {
   dist.set(start, 0);
 
   const queue = nodeElements.slice();
+
+  const visitedNodeSet = new Set();
+  const visitedEdgeSet = new Set();
+
+  visitedCount = 0;
 
   function neighborsOf(node) {
     return edges.filter(e => e.from === node || e.to === node)
@@ -460,6 +486,17 @@ function Dijkstra(start, target) {
 
     const nbrs = neighborsOf(u);
     for (const { node: v, edge, w } of nbrs) {
+
+      if (!visitedNodeSet.has(v)) {
+        visitedNodeSet.add(v);
+        visitedCount++;
+      }
+
+      if (!visitedEdgeSet.has(edge)) {
+        visitedEdgeSet.add(edge);
+        visitedCount++;
+      }
+
       const alt = dist.get(u) + w;
       steps.push({ type: "visit", node: v, edge });
 
@@ -474,7 +511,9 @@ function Dijkstra(start, target) {
   return {
     distanceToTarget: dist.get(target),
     prev,
-    steps
+    steps,
+    visitedNodeSet,
+    visitedEdgeSet
   };
 
 }

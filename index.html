@@ -182,6 +182,10 @@
           // Generate graph with selected count 
           if (typeof generateRandomNodes === 'function') {
             try {
+
+              selectedStartNode = null;
+              selectedEndNode = null;
+              
               console.log(' Calling generateRandomNodes(' + selectedNodeCount + ')');
               generateRandomNodes(selectedNodeCount);
 
@@ -193,6 +197,10 @@
                 if (typeof edges !== 'undefined' && document.getElementById('stat-edges')) {
                     document.getElementById('stat-edges').textContent = edges.length;
                 }
+
+                document.getElementById('stat-visited').textContent = '0';
+                document.getElementById('stat-status').textContent = 'Ready';
+
                 console.log(' Graph generate with'), selectedNodeCount, 'nodes';
               }, 100);
             } catch (error) {
@@ -227,9 +235,9 @@
 
       console.log('▶ Starting', selectedAlgorithm, 'algorithm');
 
-      if (typeof startAlgorithm === 'function') {
-        const ok = startAlgorithm();
-        document.getElementById('stat-status').textContent = ok ? 'Completed' : 'Error / No path';
+      const ok = startAlgorithm();
+      if (!ok) {
+        document.getElementById('stat-status').textContent = 'Error / No path';
       }
     });
     
