@@ -339,8 +339,8 @@ function generateRandomEdges() {
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
   if (nodeElements.length <= 1) return;
 
-  const MIN_EDGES = 5;
-  const MAX_EDGES = 7;
+  const MIN_EDGES = 2;
+  const MAX_EDGES = 4;
 
   const edgeCounts = new Map();
   nodeElements.forEach(n => edgeCounts.set(n, 0));
