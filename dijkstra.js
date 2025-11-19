@@ -329,6 +329,7 @@ function generateRandomNodes(count, size = 20) {
 }
 
 function generateRandomEdges() {
+  // Clear existing edges
   edges.forEach(edge => {
     edge.element1.remove();
     edge.element2.remove();
@@ -345,50 +346,41 @@ function generateRandomEdges() {
   const edgeCounts = new Map();
   nodeElements.forEach(n => edgeCounts.set(n, 0));
 
-  for (let i = 1; i < nodeElements.length; i++) {
-    const nodeA = nodeElements[i];
-    const nodeB = nodeElements[Math.floor(Math.random() * i)];
-    const weight = Math.floor(Math.random() * 100) + 1;
-    createEdge(nodeA, nodeB, weight);
-    edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
-    edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
+  // Step 1: Build a minimal spanning tree (MST) to ensure all nodes are connected nicely
+  const connectedNodes = new Set();
+  connectedNodes.add(nodeElements[0]);
+
+  while (connectedNodes.size < nodeElements.length) {
+    let shortestEdge = null;
+    let fromNode = null;
+    let toNode = null;
+
+    connectedNodes.forEach(nodeA => {
+      nodeElements.forEach(nodeB => {
+        if (connectedNodes.has(nodeB)) return; // Skip already connected
+        const weight = distance(nodeA, nodeB);
+        if (!shortestEdge || weight < shortestEdge) {
+          shortestEdge = weight;
+          fromNode = nodeA;
+          toNode = nodeB;
+        }
+      });
+    });
+
+    if (fromNode && toNode) {
+      const weight = Math.floor(Math.random() * 100) + 1;
+      createEdge(fromNode, toNode, weight);
+      edgeCounts.set(fromNode, edgeCounts.get(fromNode) + 1);
+      edgeCounts.set(toNode, edgeCounts.get(toNode) + 1);
+      connectedNodes.add(toNode);
+    }
   }
 
+  // Step 2: Add extra edges but only between near neighbors and respecting max edges
   nodeElements.forEach((nodeA, i) => {
-    let currentCount = edgeCounts.get(nodeA);
+    if (edgeCounts.get(nodeA) >= MAX_EDGES) return;
 
-    if (currentCount < MIN_EDGES) {
-      const distances = nodeElements
-        .map((nodeB, j) => {
-          if (i === j) return null;
-          return { node: nodeB, dist: distance(nodeA, nodeB) };
-        })
-        .filter(Boolean)
-        .sort((a, b) => a.dist - b.dist);
-
-      for (const { node: nodeB } of distances) {
-        if (currentCount >= MIN_EDGES) break;
-        if (edgeCounts.get(nodeB) >= MAX_EDGES) continue;
-
-        const exists = edges.some(
-          e =>
-            (e.from === nodeA && e.to === nodeB) ||
-            (e.from === nodeB && e.to === nodeA)
-        );
-        if (exists) continue;
-
-        const weight = Math.floor(Math.random() * 100) + 1;
-        createEdge(nodeA, nodeB, weight);
-
-        edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
-        edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
-        currentCount++;
-      }
-    }
-  });
-
-  nodeElements.forEach((nodeA, i) => {
-    const distances = nodeElements
+    const neighbors = nodeElements
       .map((nodeB, j) => {
         if (i === j) return null;
         return { node: nodeB, dist: distance(nodeA, nodeB) };
@@ -396,7 +388,7 @@ function generateRandomEdges() {
       .filter(Boolean)
       .sort((a, b) => a.dist - b.dist);
 
-    for (const { node: nodeB } of distances) {
+    for (const { node: nodeB } of neighbors) {
       if (edgeCounts.get(nodeA) >= MAX_EDGES) break;
       if (edgeCounts.get(nodeB) >= MAX_EDGES) continue;
 
@@ -409,13 +401,15 @@ function generateRandomEdges() {
 
       const weight = Math.floor(Math.random() * 100) + 1;
       createEdge(nodeA, nodeB, weight);
-
       edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
       edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
     }
   });
 
+  // Optional: You can also consider rerunning a force-directed layout or apply node repositioning after edges are created to reduce clutter.
 }
+
+
 /* Graph Controls */
 
 function Dijkstra(start, target) {
