@@ -188,7 +188,7 @@
               // Update stats after generation 
               setTimeout(() => {
                 if (document.getElementById('stat-nodes')) {
-                    document.getElementById('stat-nodes'). textContent = count;
+                    document.getElementById('stat-nodes'). textContent = selectedNodeCount;
                 }
                 if (typeof edges !== 'undefined' && document.getElementById('stat-edges')) {
                     document.getElementById('stat-edges').textContent = edges.length;
@@ -220,17 +220,17 @@
     
     // Start algorithm button 
     document.getElementById('startAlgoBtn').addEventListener('click', () => {
-        if (!selectedAlgorithm) {
-          console.log('⚠️ No algorithm selected');
-          return;
-        }
+      if (!selectedAlgorithm) {
+        console.log('⚠️ No algorithm selected');
+        return;
+      }
 
       console.log('▶ Starting', selectedAlgorithm, 'algorithm');
 
       if (typeof startAlgorithm === 'function') {
-        startAlgorithm();
+        const ok = startAlgorithm();
+        document.getElementById('stat-status').textContent = ok ? 'Completed' : 'Error / No path';
       }
-      document.getElementById('stat-status').textContent = 'Running';
     });
     
     // Reset Button - regernates with same count 

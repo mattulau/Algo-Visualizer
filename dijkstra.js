@@ -4,7 +4,10 @@ const svg = document.getElementById("graph");
 const nodeCountDisplay = document.getElementById("node-count");
 const nodes = [];
 const edges = [];
-
+let currentPathNodes = [];
+let currentPathEdges = [];
+let selectedStartNode = null;
+let selectedEndNode = null;
 let nodeCount = 0;
 const nodeFiles = [ "assets/node-1.svg", "assets/node-2.svg", "assets/node-3.svg", "assets/node-4.svg", "assets/node-5.svg", "assets/node-6.svg", "assets/node-7.svg" ];
 
@@ -32,8 +35,6 @@ function createNode(x, y, size = 20) {
   updateCounter();
 }
 
-let selectedStartNode = null;
-let selectedEndNode = null;
 
 function handleNodeClick(node) {
   if (!selectedStartNode) {
@@ -187,9 +188,111 @@ function clearAllNodes() {
   updateCounter();
 }
 
-function startAlgorithm() {
-  alert("Algo would run");
+function playSteps(steps, callback) {
+  let i = 0;
+
+  function next() {
+    if (i >= steps.length) {
+      callback();
+      return;
+    }
+
+    const s = steps[i];
+
+    if (s.type === "current") {
+      s.node.classList.add("current");
+    } 
+    else if (s.type === "visit") {
+      s.node.classList.add("visited");
+      s.edge.element1.classList.add("visited-edge");
+      s.edge.element2.classList.add("visited-edge");
+    }
+    else if (s.type === "relax") {
+      s.node.classList.add("visited");
+    }
+
+    setTimeout(next, 100); // speed of animation
+    i++;
+  }
+
+  next();
 }
+
+
+function startAlgorithm() {
+  if (!selectedStartNode || !selectedEndNode) {
+    alert("Pick a start and end node first.");
+    return false;
+  }
+
+  const result = Dijkstra(selectedStartNode, selectedEndNode);
+  if (!result) {
+    alert("Algorithm failed to run.");
+    return false;
+  }
+
+  const { distanceToTarget, prev, steps } = result;
+
+  if (!Number.isFinite(distanceToTarget)) {
+    alert("No path exists between the selected nodes.");
+    return false;
+  }
+
+  const finalPath = reconstructPath(prev, selectedStartNode, selectedEndNode);
+  if (!finalPath) {
+    alert("No path exists between the selected nodes.");
+    return false;
+  }
+
+  document.getElementById("stat-status").textContent = "Running";
+
+  playSteps(steps, () => {
+    highlightFinalPath(finalPath);
+    document.getElementById("stat-status").textContent = "Completed";
+  });
+
+  return true; 
+}
+
+function highlightFinalPath(path) {
+  svg.querySelectorAll(".graph-node").forEach(n => {
+    n.classList.remove("visited", "current", "path", "start", "end");
+  });
+
+  edges.forEach(e => {
+    e.element1.classList.remove("visited-edge", "path-edge");
+    e.element2.classList.remove("visited-edge", "path-edge");
+  });
+
+  currentPathNodes = [];
+  currentPathEdges = [];
+
+  path.forEach(node => {
+    node.classList.add("path");
+    currentPathNodes.push(node);
+  });
+
+  selectedStartNode.classList.add("start");
+  selectedEndNode.classList.add("end");
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i];
+    const b = path[i + 1];
+    const edge = edges.find(
+      e =>
+        (e.from === a && e.to === b) ||
+        (e.from === b && e.to === a)
+    );
+    if (edge) {
+      edge.element1.classList.add("path-edge");
+      edge.element2.classList.add("path-edge");
+      currentPathEdges.push(edge);
+    }
+  }
+}
+
+
+
 
 function generateRandomNodes(count, size = 20) {
   clearAllNodes();
@@ -226,80 +329,101 @@ function generateRandomNodes(count, size = 20) {
 }
 
 function generateRandomEdges() {
-
-  edges.forEach(edge => { edge.element1.remove(); edge.element2.remove(); edge.label.remove(); });
+  edges.forEach(edge => {
+    edge.element1.remove();
+    edge.element2.remove();
+    edge.label.remove();
+  });
   edges.length = 0;
 
-  const maxEdgesPerNode = 5; //max number of edges that can touch a node
-  const minEdgesPerNode = 2; //min number of edges that a node has
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
+  if (nodeElements.length <= 1) return;
+
+  const MIN_EDGES = 5;
+  const MAX_EDGES = 7;
 
   const edgeCounts = new Map();
   nodeElements.forEach(n => edgeCounts.set(n, 0));
 
-  nodeElements.forEach((nodeA, i ) => {
-    const distances = nodeElements.map((nodeB, j) => {
-      if (i === j) return null;
-      return { node: nodeB, dist: distance(nodeA, nodeB) };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.dist - b.dist);
+  for (let i = 1; i < nodeElements.length; i++) {
+    const nodeA = nodeElements[i];
+    const nodeB = nodeElements[Math.floor(Math.random() * i)];
+    const weight = Math.floor(Math.random() * 100) + 1;
+    createEdge(nodeA, nodeB, weight);
+    edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
+    edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
+  }
 
-    const neighbors = distances.slice(0,maxEdgesPerNode); // uses value from "maxEdgesPerNode" to determine amount of edges a node can be touched by
-    
-    neighbors.forEach(({ node: nodeB }) => {
-      if (edgeCounts.get(nodeA) < maxEdgesPerNode && edgeCounts.get(nodeB) < maxEdgesPerNode) {
-        const weight = Math.floor(Math.random() * 100) + 1; // changes edge weight max value
+  nodeElements.forEach((nodeA, i) => {
+    let currentCount = edgeCounts.get(nodeA);
+
+    if (currentCount < MIN_EDGES) {
+      const distances = nodeElements
+        .map((nodeB, j) => {
+          if (i === j) return null;
+          return { node: nodeB, dist: distance(nodeA, nodeB) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.dist - b.dist);
+
+      for (const { node: nodeB } of distances) {
+        if (currentCount >= MIN_EDGES) break;
+        if (edgeCounts.get(nodeB) >= MAX_EDGES) continue;
+
+        const exists = edges.some(
+          e =>
+            (e.from === nodeA && e.to === nodeB) ||
+            (e.from === nodeB && e.to === nodeA)
+        );
+        if (exists) continue;
+
+        const weight = Math.floor(Math.random() * 100) + 1;
         createEdge(nodeA, nodeB, weight);
-        
+
         edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
         edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
+        currentCount++;
       }
-    });
+    }
   });
 
   nodeElements.forEach((nodeA, i) => {
-    let count = edgeCounts.get(nodeA);
-    if (count < minEdgesPerNode) {
-      const distances = nodeElements.map((nodeB, j) => {
-        if (i == j) return null;
+    const distances = nodeElements
+      .map((nodeB, j) => {
+        if (i === j) return null;
         return { node: nodeB, dist: distance(nodeA, nodeB) };
       })
       .filter(Boolean)
       .sort((a, b) => a.dist - b.dist);
 
-      for (const { node: nodeB } of distances) {
-        if (count >= minEdgesPerNode) break;
-        if (edgeCounts.get(nodeB) < maxEdgesPerNode) {
-          const exists = edges.some(
-            e =>
-            (e.from === nodeA && e.to === nodeB) ||
-            (e.from === nodeB && e.to === nodeA)
-          );
-          if (!exists) {
-            const weight = Math.floor(Math.random() * 10) + 1;
-            createEdge(nodeA, nodeB, weight);
+    for (const { node: nodeB } of distances) {
+      if (edgeCounts.get(nodeA) >= MAX_EDGES) break;
+      if (edgeCounts.get(nodeB) >= MAX_EDGES) continue;
 
-            edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
-            edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
-            count++;
-          }
-        }
-      }
+      const exists = edges.some(
+        e =>
+          (e.from === nodeA && e.to === nodeB) ||
+          (e.from === nodeB && e.to === nodeA)
+      );
+      if (exists) continue;
+
+      const weight = Math.floor(Math.random() * 100) + 1;
+      createEdge(nodeA, nodeB, weight);
+
+      edgeCounts.set(nodeA, edgeCounts.get(nodeA) + 1);
+      edgeCounts.set(nodeB, edgeCounts.get(nodeB) + 1);
     }
   });
+
 }
 /* Graph Controls */
 
 function Dijkstra(start, target) {
-  if (!start || !target) {
-    console.warn("[Dijkstra] Missing start/target");
-    return null;
-  }
-
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
   const dist = new Map();
   const prev = new Map();
+
+  const steps = []; // animation steps
 
   nodeElements.forEach(n => {
     dist.set(n, Infinity);
@@ -310,47 +434,45 @@ function Dijkstra(start, target) {
   const queue = nodeElements.slice();
 
   function neighborsOf(node) {
-    const list = [];
-    for (const e of edges) {
-      if (e.from === node) list.push({ node: e.to, w: e.weight ?? 1 });
-      else if (e.to === node) list.push({ node: e.from, w: e.weight ?? 1 });
-    }
-    return list;
+    return edges.filter(e => e.from === node || e.to === node)
+      .map(e => ({
+        node: e.from === node ? e.to : e.from,
+        edge: e,
+        w: e.weight
+      }));
   }
 
-  while (queue.length) {
+  while (queue.length > 0) {
     let u = null;
     let uIdx = -1;
     let best = Infinity;
 
     for (let i = 0; i < queue.length; i++) {
-      const cand = queue[i];
-      const d = dist.get(cand);
-      if (d < best) {
-        best = d;
-        u = cand;
+      const node = queue[i];
+      if (dist.get(node) < best) {
+        best = dist.get(node);
+        u = node;
         uIdx = i;
       }
     }
 
-    if (!u) {
-      console.log("[Dijkstra] No reachable node found, exiting early.");
-      break;
-    }
-
-    if (u === target) {
-      console.log("[Dijkstra] Reached target early.");
-      break;
-    }
+    if (!u) break;
 
     queue.splice(uIdx, 1);
 
+    steps.push({ type: "current", node: u });
+
+    if (u === target) break;
+
     const nbrs = neighborsOf(u);
-    for (const { node: v, w } of nbrs) {
-      const alt = dist.get(u) + (Number.isFinite(w) ? w : 1);
+    for (const { node: v, edge, w } of nbrs) {
+      const alt = dist.get(u) + w;
+      steps.push({ type: "visit", node: v, edge });
+
       if (alt < dist.get(v)) {
         dist.set(v, alt);
         prev.set(v, u);
+        steps.push({ type: "relax", node: v, edge });
       }
     }
   }
@@ -358,6 +480,23 @@ function Dijkstra(start, target) {
   return {
     distanceToTarget: dist.get(target),
     prev,
-    dist
+    steps
   };
+
 }
+
+function reconstructPath(prev, start, target) {
+  const path = [];
+  let cur = target;
+
+  while (cur && cur !== start) {
+    path.unshift(cur);
+    cur = prev.get(cur);
+  }
+
+  if (!cur) return null;
+
+  path.unshift(start);
+  return path;
+}
+

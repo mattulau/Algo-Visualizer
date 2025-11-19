@@ -550,7 +550,7 @@ body {
 
 
 .graph-node.start {
-    filter: brightness(0) saturate(100%) invert(64%) sepia(51%) saturate(518%) hue-rotate(84deg) brightness(93%) contrast(89%);
+    filter: brightness(0) saturate(100%) invert(28%) sepia(77%) saturate(6575%) hue-rotate(350deg) brightness(100%) contrast(90%);
   }
   
   .graph-node.end {
@@ -569,3 +569,13 @@ body {
     filter: brightness(0) saturate(100%) invert(43%) sepia(99%) saturate(1200%) hue-rotate(315deg) brightness(100%) contrast(90%);
   }
   
+.visited-edge {
+  stroke: #9854EB !important; /* purple */
+  stroke-width: 3 !important;
+  transition: stroke 0.2s ease;
+}
+
+.path-edge {
+  stroke: #3FB05F !important; /* green */
+  stroke-width: 4 !important;
+}
