@@ -223,6 +223,7 @@
     // Stop button 
     document.getElementById('stopBtn').addEventListener('click', () => {
         console.log('⏸ Algorithm stopped');
+        stopRequested = true;
         document.getElementById('stat-status').textContent = 'Stopped';
     });
     

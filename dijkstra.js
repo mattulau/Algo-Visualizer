@@ -4,6 +4,7 @@ const svg = document.getElementById("graph");
 const nodeCountDisplay = document.getElementById("node-count");
 const nodes = [];
 const edges = [];
+let stopRequested = false;
 let currentPathNodes = [];
 let currentPathEdges = [];
 let selectedStartNode = null;
@@ -203,6 +204,12 @@ function playSteps(steps, callback) {
   let i = 0;
 
   function next() {
+
+    if (stopRequested) {
+      console.log("⏸ Animation stopped by user");
+      return;
+    }
+
     if (i >= steps.length) {
       callback();
       return;
@@ -231,6 +238,8 @@ function playSteps(steps, callback) {
 
 
 function startAlgorithm() {
+  stopRequested = false;
+
   if (!selectedStartNode || !selectedEndNode) {
     alert("Pick a start and end node first.");
     return false;
