@@ -245,9 +245,23 @@ function startAlgorithm() {
     return false;
   }
 
-  resetVisitedCount(); //reset count before running again
+  resetVisitedCount();
 
-  const result = Dijkstra(selectedStartNode, selectedEndNode);
+  let result;
+
+  if (selectedAlgorithm === "dijkstra") {
+    console.log("Running Dijkstra");
+    result = Dijkstra(selectedStartNode, selectedEndNode);
+  } 
+  else if (selectedAlgorithm === "astar") {
+    console.log("Running A*");
+    result = AStar(selectedStartNode, selectedEndNode); 
+  } 
+  else {
+    alert("Unknown algorithm selected.");
+    return false;
+  }
+
   if (!result) {
     alert("Algorithm failed to run.");
     return false;
@@ -272,13 +286,14 @@ function startAlgorithm() {
     highlightFinalPath(finalPath);
 
     const totalVisited = visitedNodeSet.size + visitedEdgeSet.size;
-    document.getElementById('stat-visited').textContent = totalVisited;
+    document.getElementById("stat-visited").textContent = totalVisited;
 
     document.getElementById("stat-status").textContent = "Completed";
   });
 
-  return true; 
+  return true;
 }
+
 
 function highlightFinalPath(path) {
   svg.querySelectorAll(".graph-node").forEach(n => {
@@ -373,7 +388,6 @@ function generateRandomEdges() {
   const edgeCounts = new Map();
   nodeElements.forEach(n => edgeCounts.set(n, 0));
 
-  // Step 1: Build a minimal spanning tree (MST) to ensure all nodes are connected nicely
   const connectedNodes = new Set();
   connectedNodes.add(nodeElements[0]);
 
@@ -403,7 +417,6 @@ function generateRandomEdges() {
     }
   }
 
-  // Step 2: Add extra edges but only between near neighbors and respecting max edges
   nodeElements.forEach((nodeA, i) => {
     if (edgeCounts.get(nodeA) >= MAX_EDGES) return;
 
@@ -442,12 +455,78 @@ function generateRandomEdges() {
 
 /* Graph Controls */
 
+class MinHeap {
+  constructor(compareFn) {
+    this.data = [];
+    this.compare = compareFn;
+  }
+
+  push(item) {
+    this.data.push(item);
+    this.bubbleUp();
+  }
+
+  pop() {
+    if (this.data.length === 1) return this.data.pop();
+    const top = this.data[0];
+    this.data[0] = this.data.pop();
+    this.bubbleDown();
+    return top;
+  }
+
+  isEmpty() {
+    return this.data.length === 0;
+  }
+
+  bubbleUp() {
+    let i = this.data.length - 1;
+    while (i > 0) {
+      let p = Math.floor((i - 1) / 2);
+      if (!this.compare(this.data[i], this.data[p])) break;
+      [this.data[i], this.data[p]] = [this.data[p], this.data[i]];
+      i = p;
+    }
+  }
+  
+  bubbleDown() {
+    let i = 0;
+    const n = this.data.length;
+    while (true) {
+      let left = 2*i + 1;
+      let right = 2*i + 2;
+      let smallest = i;
+  
+      if (left < n && this.compare(this.data[left], this.data[smallest])) {
+        smallest = left;
+      }
+      if (right < n && this.compare(this.data[right], this.data[smallest])) {
+        smallest = right;
+      }
+      if (smallest === i) break;
+  
+      [this.data[i], this.data[smallest]] = [this.data[smallest], this.data[i]];
+      i = smallest;
+    }
+  }
+  
+}
+
+
+
 function Dijkstra(start, target) {
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
+
+  // Build adjacency
+  const adj = new Map();
+  nodeElements.forEach(n => adj.set(n, []));
+  for (const e of edges) {
+    adj.get(e.from).push({ node: e.to, edge: e, w: e.weight });
+    adj.get(e.to).push({ node: e.from, edge: e, w: e.weight });
+  }
+
   const dist = new Map();
   const prev = new Map();
-
-  const steps = []; // animation steps
+  const steps = [];
 
   nodeElements.forEach(n => {
     dist.set(n, Infinity);
@@ -455,63 +534,41 @@ function Dijkstra(start, target) {
   });
   dist.set(start, 0);
 
-  const queue = nodeElements.slice();
+  const pq = new MinHeap((a, b) => a.dist < b.dist);
+  pq.push({ node: start, dist: 0 });
 
   const visitedNodeSet = new Set();
   const visitedEdgeSet = new Set();
 
-  visitedCount = 0;
+  while (!pq.isEmpty()) {
+    const { node: u, dist: distU } = pq.pop();
+    if (distU !== dist.get(u)) continue;
 
-  function neighborsOf(node) {
-    return edges.filter(e => e.from === node || e.to === node)
-      .map(e => ({
-        node: e.from === node ? e.to : e.from,
-        edge: e,
-        w: e.weight
-      }));
-  }
-
-  while (queue.length > 0) {
-    let u = null;
-    let uIdx = -1;
-    let best = Infinity;
-
-    for (let i = 0; i < queue.length; i++) {
-      const node = queue[i];
-      if (dist.get(node) < best) {
-        best = dist.get(node);
-        u = node;
-        uIdx = i;
-      }
+    // COUNT VISITED NODE
+    if (!visitedNodeSet.has(u)) {
+      visitedNodeSet.add(u);
+      visitedCount++;
     }
 
-    if (!u) break;
-
-    queue.splice(uIdx, 1);
-
     steps.push({ type: "current", node: u });
-
     if (u === target) break;
 
-    const nbrs = neighborsOf(u);
-    for (const { node: v, edge, w } of nbrs) {
-
-      if (!visitedNodeSet.has(v)) {
-        visitedNodeSet.add(v);
-        visitedCount++;
-      }
+    for (const { node: v, edge, w } of adj.get(u)) {
 
       if (!visitedEdgeSet.has(edge)) {
         visitedEdgeSet.add(edge);
         visitedCount++;
       }
 
-      const alt = dist.get(u) + w;
-      steps.push({ type: "visit", node: v, edge });
+      const alt = distU + w;
 
+      steps.push({ type: "visit", node: v, edge });
+      
       if (alt < dist.get(v)) {
         dist.set(v, alt);
         prev.set(v, u);
+
+        pq.push({ node: v, dist: alt });
         steps.push({ type: "relax", node: v, edge });
       }
     }
@@ -524,8 +581,96 @@ function Dijkstra(start, target) {
     visitedNodeSet,
     visitedEdgeSet
   };
-
 }
+
+function heuristic(nodeA, nodeB) {
+  const ax = parseFloat(nodeA.getAttribute("cx"));
+  const ay = parseFloat(nodeA.getAttribute("cy"));
+  const bx = parseFloat(nodeB.getAttribute("cx"));
+  const by = parseFloat(nodeB.getAttribute("cy"));
+  return Math.hypot(ax - bx, ay - by);
+}
+
+function AStar(start, target) {
+  const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
+
+  // Build adjacency list
+  const adj = new Map();
+  nodeElements.forEach(n => adj.set(n, []));
+  for (const e of edges) {
+    adj.get(e.from).push({ node: e.to, edge: e, w: e.weight });
+    adj.get(e.to).push({ node: e.from, edge: e, w: e.weight });
+  }
+
+  // Distances
+  const gScore = new Map();
+  const fScore = new Map();
+  const prev = new Map();
+
+  nodeElements.forEach(n => {
+    gScore.set(n, Infinity);
+    fScore.set(n, Infinity);
+    prev.set(n, null);
+  });
+
+  gScore.set(start, 0);
+  fScore.set(start, heuristic(start, target));
+
+  // Priority queue based on fScore
+  const pq = new MinHeap((a, b) => a.f < b.f);
+  pq.push({ node: start, f: fScore.get(start) });
+
+  const steps = [];
+  const visitedNodeSet = new Set();
+  const visitedEdgeSet = new Set();
+
+  while (!pq.isEmpty()) {
+    const { node } = pq.pop();
+
+    if (!visitedNodeSet.has(node)) {
+      visitedNodeSet.add(node);
+      visitedCount++;
+    }
+
+    steps.push({ type: "current", node });
+
+    if (node === target) break;
+
+    for (const { node: neighbor, edge, w } of adj.get(node)) {
+
+      if (!visitedEdgeSet.has(edge)) {
+        visitedEdgeSet.add(edge);
+        visitedCount++;
+      }
+
+      steps.push({ type: "visit", node: neighbor, edge });
+
+      const tentative_g = gScore.get(node) + w;
+
+      if (tentative_g < gScore.get(neighbor)) {
+        prev.set(neighbor, node);
+        gScore.set(neighbor, tentative_g);
+
+        const f = tentative_g + heuristic(neighbor, target);
+        fScore.set(neighbor, f);
+
+        pq.push({ node: neighbor, f });
+
+        steps.push({ type: "relax", node: neighbor, edge });
+      }
+    }
+  }
+
+  return {
+    distanceToTarget: gScore.get(target),
+    prev,
+    steps,
+    visitedNodeSet,
+    visitedEdgeSet
+  };
+}
+
+
 
 function reconstructPath(prev, start, target) {
   const path = [];
