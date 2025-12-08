@@ -584,12 +584,13 @@ function Dijkstra(start, target) {
 }
 
 function heuristic(nodeA, nodeB) {
-  const ax = parseFloat(nodeA.getAttribute("cx"));
-  const ay = parseFloat(nodeA.getAttribute("cy"));
-  const bx = parseFloat(nodeB.getAttribute("cx"));
-  const by = parseFloat(nodeB.getAttribute("cy"));
+  const ax = parseFloat(nodeA.getAttribute("x")) + parseFloat(nodeA.getAttribute("width")) / 2;
+  const ay = parseFloat(nodeA.getAttribute("y")) + parseFloat(nodeA.getAttribute("height")) / 2;
+  const bx = parseFloat(nodeB.getAttribute("x")) + parseFloat(nodeB.getAttribute("width")) / 2;
+  const by = parseFloat(nodeB.getAttribute("y")) + parseFloat(nodeB.getAttribute("height")) / 2;
   return Math.hypot(ax - bx, ay - by);
 }
+
 
 function AStar(start, target) {
   const nodeElements = Array.from(svg.querySelectorAll(".graph-node"));
