@@ -17,7 +17,7 @@ A* Search
 - It is an informed search algorithm and combines the cost so far from the start node and a heuristic estimate from the current node to the goal.
 - The heuristic is admissible and consistent
 
-# Visualization Logic
+## Visualization Logic
 For both algorithms, the visualizer shows:
 1. Unvisited nodes - default color
 2. Frontier / open set - Nodes that are discovered and waiting to be explored
