@@ -13,6 +13,33 @@ let nodeCount = 0;
 let visitedCount = 0;
 const nodeFiles = [ "assets/node-1.svg", "assets/node-2.svg", "assets/node-3.svg", "assets/node-4.svg", "assets/node-5.svg", "assets/node-6.svg", "assets/node-7.svg" ];
 
+// Colored node SVG files for different states
+const coloredNodes = {
+  start: "assets/green-node.svg",
+  end: "assets/red-node.svg",
+  current: "assets/pink-node.svg"
+};
+
+// Helper function to update the node visual based on its current state
+function updateNodeVisual(node) {
+  if (!node) return;
+
+  // Priority order: start > end > current
+  if(node.classList.contains('start')) {
+    node.setAttribute('href', coloredNodes.start);
+  } else if (node.classList.contains('end')) {
+    node.setAttribute('href', coloredNodes.end);
+  } else if (node.classList.contains('current')) {
+    node.setAttribute('href', coloredNodes.current);
+  } else {
+    // Use the original random node 
+    const originalSvg = node.getAttribute('data-original-svg');
+    if (originalSvg) {
+      node.setAttribute('href', originalSvg);
+    }
+  }
+}
+
 function updateCounter() {
   const nodes = svg.querySelectorAll(".graph-node")
   nodeCount = nodes.length;
@@ -34,7 +61,8 @@ function createNode(x, y, size = 20) {
   const randomFile = nodeFiles[Math.floor(Math.random() * nodeFiles.length)];
 
   const newNode = document.createElementNS("http://www.w3.org/2000/svg", "image");
-  newNode.setAttribute("href", randomFile);
+  newNode.setAttribute("href", randomFile); // start with default nods
+  newNode.setAttribute("data-original-svg", randomFile); // store og for later
   newNode.setAttribute("x", x);
   newNode.setAttribute("y", y);
   newNode.setAttribute("width", size);
@@ -52,21 +80,25 @@ function handleNodeClick(node) {
   if (!selectedStartNode) {
     node.classList.add("start");
     selectedStartNode = node;
+    updateNodeVisual(node);
     console.log("Start node selected");
   }
   else if (!selectedEndNode && node !== selectedStartNode) {
     node.classList.add("end");
     selectedEndNode = node;
+    updateNodeVisual(node);
     console.log("End node selected");
   }
   else if (node === selectedStartNode) {
     node.classList.remove("start");
     selectedStartNode = null;
+    updateNodeVisual(node);
     console.log("Start node deselected");
   }
   else if (node === selectedEndNode) {
     node.classList.remove("end");
     selectedEndNode = null;
+    updateNodeVisual(node);
     console.log("End node deselected");
   }
 
@@ -218,16 +250,26 @@ function playSteps(steps, callback) {
     const s = steps[i];
 
     if (s.type === "current") {
-      s.node.classList.add("current");
+      if (s.node !== selectedStartNode && s.node !== selectedEndNode) {
+        s.node.classList.add("current");
+        updateNodeVisual(s.node);
+      }
+  
     } 
     else if (s.type === "visit") {
-      s.node.classList.add("visited");
+      if (s.node !== selectedStartNode && s.node !== selectedEndNode) {
+        s.node.classList.add("visited");
+        updateNodeVisual(s.node);
+      }
       s.edge.element1.classList.add("visited-edge");
       s.edge.element2.classList.add("visited-edge");
     }
     else if (s.type === "relax") {
+    if (s.node !== selectedStartNode && s.node !== selectedEndNode) {
       s.node.classList.add("visited");
-    }
+      updateNodeVisual(s.node);
+    }  
+  }
 
     setTimeout(next, 25); // speed of animation
     i++;
@@ -298,6 +340,7 @@ function startAlgorithm() {
 function highlightFinalPath(path) {
   svg.querySelectorAll(".graph-node").forEach(n => {
     n.classList.remove("visited", "current", "path", "start", "end");
+    updateNodeVisual(n);
   });
 
   edges.forEach(e => {
@@ -314,7 +357,9 @@ function highlightFinalPath(path) {
   });
 
   selectedStartNode.classList.add("start");
+  updateNodeVisual(selectedStartNode);
   selectedEndNode.classList.add("end");
+  updateNodeVisual(selectedEndNode);
 
   for (let i = 0; i < path.length - 1; i++) {
     const a = path[i];
