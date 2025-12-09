@@ -520,7 +520,7 @@ body {
 /* matching graph to node colors */
 .dot.start   { background: #3FB05F; }
 .dot.end     { background: #F53333; }
-.dot.visited { background: #9854EB; }
+.dot.visited { background: #E6A4FF; }
 .dot.path    { background: #FDCB35; }
 .dot.current { background: #FF518E; }
 
@@ -571,7 +571,7 @@ body {
  
 
 .visited-edge {
-  stroke: #9854EB !important; /* purple */
+  stroke: #E6A4FF !important; /* purple */
   stroke-width: 3 !important;
   transition: stroke 0.2s ease;
 }
