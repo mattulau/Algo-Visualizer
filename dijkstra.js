@@ -229,7 +229,7 @@ function playSteps(steps, callback) {
       s.node.classList.add("visited");
     }
 
-    setTimeout(next, 100); // speed of animation
+    setTimeout(next, 25); // speed of animation
     i++;
   }
 
