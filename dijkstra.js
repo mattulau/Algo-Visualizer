@@ -528,46 +528,32 @@ function Dijkstra(start, target) {
   const prev = new Map();
   const steps = [];
 
-  nodeElements.forEach(n => {
+  for (const n of nodeElements) {
     dist.set(n, Infinity);
     prev.set(n, null);
-  });
+  }
   dist.set(start, 0);
-
   const pq = new MinHeap((a, b) => a.dist < b.dist);
   pq.push({ node: start, dist: 0 });
 
-  const visitedNodeSet = new Set();
-  const visitedEdgeSet = new Set();
+  const visited = new Set();
 
   while (!pq.isEmpty()) {
     const { node: u, dist: distU } = pq.pop();
     if (distU !== dist.get(u)) continue;
 
-    // COUNT VISITED NODE
-    if (!visitedNodeSet.has(u)) {
-      visitedNodeSet.add(u);
-      visitedCount++;
-    }
+    if (visited.has(u)) continue;
+    visited.add(u);
 
     steps.push({ type: "current", node: u });
+
     if (u === target) break;
-
     for (const { node: v, edge, w } of adj.get(u)) {
-
-      if (!visitedEdgeSet.has(edge)) {
-        visitedEdgeSet.add(edge);
-        visitedCount++;
-      }
-
       const alt = distU + w;
-
       steps.push({ type: "visit", node: v, edge });
-      
       if (alt < dist.get(v)) {
         dist.set(v, alt);
         prev.set(v, u);
-
         pq.push({ node: v, dist: alt });
         steps.push({ type: "relax", node: v, edge });
       }
@@ -578,8 +564,7 @@ function Dijkstra(start, target) {
     distanceToTarget: dist.get(target),
     prev,
     steps,
-    visitedNodeSet,
-    visitedEdgeSet
+    visited
   };
 }
 
