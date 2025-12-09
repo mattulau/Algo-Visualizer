@@ -271,7 +271,7 @@ function playSteps(steps, callback) {
     }  
   }
 
-    setTimeout(next, 25); // speed of animation
+    setTimeout(next, 0); // speed of animation
     i++;
   }
 
